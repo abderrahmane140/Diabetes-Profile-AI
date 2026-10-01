@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Local configuration
+.env
+
+# Notebook temporary files
+.ipynb_checkpoints/
+
+# Datasets
+data/raw/*
+data/processed/*
+
+# Generated models and service files
+models/*
+mlruns/
+mlartifacts/
+logs/
+*.db
