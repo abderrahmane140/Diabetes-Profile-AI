@@ -1,0 +1,26 @@
+services:
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+
+    command: standalone
+
+    network_mode: host
+
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "admin:admin"
+      AIRFLOW__API__HOST: "127.0.0.1"
+      AIRFLOW__API__PORT: "8080"
+      MLFLOW_TRACKING_URI: "http://127.0.0.1:5000"
+      PYTHONUNBUFFERED: "1"
+
+    volumes:
+      - airflow_data:/opt/airflow
+      - ./dags:/opt/airflow/dags:ro
+      - ./src:/opt/project/src:ro
+      - ./data:/opt/project/data:ro
+
+volumes:
+  airflow_data:

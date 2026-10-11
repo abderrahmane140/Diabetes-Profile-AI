@@ -1,0 +1,132 @@
+services:
+  mlflow:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: diabetes-profile-app:local
+
+    command:
+      - mlflow
+      - server
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "5000"
+      - --backend-store-uri
+      - "sqlite:////mlflow_data/mlflow.db"
+      - --serve-artifacts
+      - --artifacts-destination
+      - "/mlflow_data/artifacts"
+      - --allowed-hosts
+      - "mlflow:5000,localhost:*,127.0.0.1:*"
+
+    ports:
+      - "127.0.0.1:5000:5000"
+
+    volumes:
+      - ./mlflow_data:/mlflow_data
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=5)"
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: diabetes-profile-app:local
+
+    command:
+      - python
+      - -m
+      - uvicorn
+      - api.main:app
+      - --host
+      - "0.0.0.0"
+      - --port
+      - "8000"
+
+    environment:
+      MLFLOW_TRACKING_URI: "http://mlflow:5000"
+
+    ports:
+      - "127.0.0.1:8000:8000"
+
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"
+      interval: 10s
+      timeout: 10s
+      retries: 12
+      start_period: 120s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: diabetes-profile-app:local
+
+    command:
+      - python
+      - -m
+      - streamlit
+      - run
+      - frontend/app.py
+      - --server.address=0.0.0.0
+      - --server.port=8501
+      - --server.headless=true
+
+    environment:
+      API_URL: "http://api:8000"
+
+    ports:
+      - "127.0.0.1:8501:8501"
+
+    depends_on:
+      api:
+        condition: service_healthy
+
+  airflow:
+    build:
+      context: .
+      dockerfile: Dockerfile.airflow
+
+    command: standalone
+
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      AIRFLOW__CORE__SIMPLE_AUTH_MANAGER_USERS: "admin:admin"
+      AIRFLOW__API__HOST: "0.0.0.0"
+      AIRFLOW__API__PORT: "8080"
+      MLFLOW_TRACKING_URI: "http://mlflow:5000"
+      PYTHONUNBUFFERED: "1"
+
+    ports:
+      - "127.0.0.1:8080:8080"
+
+    volumes:
+      - airflow_data:/opt/airflow
+      - ./dags:/opt/airflow/dags:ro
+      - ./src:/opt/project/src:ro
+      - ./data:/opt/project/data:ro
+
+    depends_on:
+      mlflow:
+        condition: service_healthy
+
+volumes:
+  airflow_data:

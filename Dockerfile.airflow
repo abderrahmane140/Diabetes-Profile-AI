@@ -1,0 +1,8 @@
+FROM apache/airflow:3.3.2-python3.12
+
+COPY --chown=airflow:root requirements-training.txt /tmp/requirements-training.txt
+
+RUN python -m venv /home/airflow/training-env
+
+RUN /home/airflow/training-env/bin/pip install --no-cache-dir \
+    -r /tmp/requirements-training.txt
