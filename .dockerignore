@@ -1,0 +1,12 @@
+.venv/
+.git/
+__pycache__/
+**/__pycache__/
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+notebooks/
+data/
+models/
+reports/
+mlflow_data/
+mlflow_data.backup*/
