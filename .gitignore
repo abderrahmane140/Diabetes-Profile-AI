@@ -1,21 +1,54 @@
-# Python
+# Python environments and caches
 .venv/
+venv/
 __pycache__/
-*.pyc
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Local configuration
-.env
-
-# Notebook temporary files
+# Notebook checkpoints
 .ipynb_checkpoints/
 
-# Datasets
-data/raw/*
-data/processed/*
+# Local secrets
+.env
+.env.*
+!.env.example
 
-# Generated models and service files
-models/*
+# Datasets — keep folder placeholders
+data/**
+!data/**/
+!data/**/.gitkeep
+
+# Generated model files
+models/**
+!models/**/
+!models/**/.gitkeep
+*.joblib
+*.pkl
+*.skops
+
+# MLflow database, artifacts, and backups
+mlflow_data/
+mlflow_data.backup*/
 mlruns/
 mlartifacts/
+mlflow.db
+mlflow.db-*
+
+# Airflow runtime files
+airflow_data/
 logs/
-*.db
+airflow.cfg
+airflow.db
+airflow.db-*
+simple_auth_manager_passwords.json.generated
+standalone_admin_password.txt
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+.env
